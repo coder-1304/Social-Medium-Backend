@@ -9,7 +9,7 @@ const auth = async (req, res, next) => {
 
     if (!authHeader) {
       // If the Authorization header is missing, respond with an error
-      return res.status(statusCodes[9]).json({
+      return res.status(400).json({
         success: false,
         erroCode: 9,
         message: "Authentication Failed: Header Must be provided",
@@ -29,8 +29,9 @@ const auth = async (req, res, next) => {
         message: "Verification Failed",
       });
     }
+    console.log(verifyUser);
 
-    const user = await User.findOne({ _id: verifyUser._id }); //getting all the information of user from the database
+    const user = await User.findOne({username: verifyUser.username}); //getting all the information of user from the database
     // console.log(user);
     console.log(user.name + " & " + user.email);
     req.user = user;
@@ -38,10 +39,10 @@ const auth = async (req, res, next) => {
     next();
   } catch (error) {
     console.log(error);
-    return res.status(statusCodes[10]).json({
+    return res.status(400).json({
       success: false,
       statusCode: 10,
-      message: statusCodes[10],
+      message: "Authentication Failed",
     });
   }
 };

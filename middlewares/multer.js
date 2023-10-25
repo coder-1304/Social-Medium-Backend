@@ -32,6 +32,10 @@ function checkFileType(file, cb) {
   if (mimeType && extName) {
     return cb(null, true);
   } else {
+    // res.status(400).json({
+    //   success: false,
+    //   message: "Invalid image type."
+    // })
     cb("Error: Images Only !!!");
   }
 }

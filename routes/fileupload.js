@@ -1,18 +1,3 @@
-const {
-  login,
-  register,
-  getAllFriends,
-  setAvatar,
-  logOut,
-  searchUsers,
-  sendFriendRequest,
-  fetchRequests,
-  addFriend,
-  changeProfilePhoto
-} = require("../controllers/userController");
-
-const auth = require("../middlewares/auth");
-
 const router = require("express").Router();
 
 // For files:
@@ -27,19 +12,6 @@ const { firebaseAuth } = require("../config/firebase.config");
 
 const { Storage } = require("@google-cloud/storage");
 const generateUrl = require("../urlGenerator.js");
-
-// Routings:
-
-router.post("/login", login);
-router.post("/register", register);
-router.get("/allFriends",auth, getAllFriends);
-router.post("/setavatar/:id", setAvatar);
-router.get("/logout/:id", logOut);
-router.get("/searchUsers/:text", searchUsers);
-router.get("/sendFriendRequest/:username",auth, sendFriendRequest);
-router.get("/fetchRequests",auth, fetchRequests);
-router.get("/addFriend/:username",auth, addFriend);
-router.post("/changeProfilePhoto",auth, changeProfilePhoto);
 
 async function uploadImage(file, quantity) {
   const storageFB = getStorage();
@@ -80,20 +52,23 @@ async function uploadImage(file, quantity) {
   }
 }
 
-router.post("/testing", upload, async (req, res) => {
-  const file = {
-    type: req.file.mimetype,
-    buffer: req.file.buffer,
-  };
+router.post("/uploadImage", upload, async (req, res) => {
+  console.log(req.file);
+  console.log("File uploading....");
   try {
+    const file = {
+      type: req.file.mimetype,
+      buffer: req.file.buffer,
+    };
     const buildImage = await uploadImage(file, "single");
     const imageUrl = await generateUrl(buildImage);
     return res.status(200).json({
       success: true,
-      imageName: imageUrl,
+      imageUrl: imageUrl,
     });
   } catch (err) {
     console.log(err);
+    return res.status(400).json({success:false})
   }
 });
 

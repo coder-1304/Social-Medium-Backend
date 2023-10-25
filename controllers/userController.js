@@ -13,7 +13,7 @@ module.exports.login = async (req, res, next) => {
       return res.json({ msg: "Incorrect Username or Password", status: false });
     delete user.password;
 
-    req.user=user;
+    req.user = user;
 
     console.log("SIGNING JWT");
     const token = await jwt.sign({ username }, process.env.JWTSECRETKEY, {
@@ -56,14 +56,13 @@ module.exports.register = async (req, res, next) => {
   }
 };
 
-module.exports.getAllUsers = async (req, res, next) => {
+module.exports.getAllFriends = async (req, res, next) => {
   try {
-    const users = await User.find({ _id: { $ne: req.params.id } }).select([
-      "email",
-      "username",
-      "avatarImage",
-      "_id",
-    ]);
+    const users = await User.find({
+      username: {
+        $in: req.user.friends,
+      },
+    }).select(["email", "username", "name", "avatarImage", "_id"]);
     // console.log(users);
     return res.json(users);
   } catch (ex) {
@@ -126,7 +125,7 @@ module.exports.sendFriendRequest = async (req, res, next) => {
   try {
     const username = req.params.username;
     if (req.user.username == username || req.user.friends.includes(username)) {
-      return res.status(400).json({success:false})
+      return res.status(400).json({ success: false });
     }
     const searchUser = await User.findOne({ username: username });
     let requests = searchUser.friendReq;
@@ -154,6 +153,88 @@ module.exports.sendFriendRequest = async (req, res, next) => {
       success: true,
     });
   } catch (ex) {
+    next(ex);
+  }
+};
+
+module.exports.fetchRequests = async (req, res, next) => {
+  try {
+    const result = await User.find({
+      username: {
+        $in: req.user.friendReq,
+      },
+    }).select("name username avatarImage");
+    return res.status(200).json({
+      success: true,
+      result,
+    });
+  } catch (ex) {
+    next(ex);
+  }
+};
+
+module.exports.addFriend = async (req, res, next) => {
+  console.log("ADDING");
+  try {
+    let fUsername = req.params.username;
+    let myUsername = req.user.username;
+    if (fUsername == myUsername) {
+      return res.end();
+    }
+
+    //add me to friend's list
+    let searchUser = await User.findOne({ username: fUsername });
+    let friends = searchUser.friends;
+    friends.push(req.user.username);
+    searchUser.friends = friends;
+    searchUser.save();
+
+    let currFriends = req.user.friends;
+    currFriends.push(fUsername);
+    let friendReq = req.user.friendReq;
+    for (let i = 0; i < friendReq.length; i++) {
+      if (friendReq[i] == fUsername) {
+        friendReq.splice(i, 1);
+        break;
+      }
+    }
+    req.user.friendReq = friendReq;
+    req.user.save();
+
+    // Adding Notification
+    const notification = `${myUsername} accepted your friend request`;
+    const newNotification = {
+      notification: notification,
+      notificationAbout: "",
+      postId: "Na",
+    };
+    const user = await User.findOne({ username: fUsername });
+    let n = user.newNotifications;
+    n++;
+    user.newNotifications = n;
+    user.notifications.push(newNotification);
+    user.save();
+    return res.status(200).json({ success: true });
+  } catch (error) {
+    console.log(error);
+    return res.status(400).json({
+      success: false,
+      message: "Internal Server Error",
+    });
+  }
+};
+
+module.exports.changeProfilePhoto = async (req, res, next) => {
+  try {
+    console.log("CHANGING")
+    req.user.avatarImage = req.body.imageUrl;
+    req.user.save();
+    console.log("SUCCESS");
+    return res.status(200).json({
+      success: true,
+    });
+  } catch (ex) {
+    res.status(400).json({ success: false });
     next(ex);
   }
 };
