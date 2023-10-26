@@ -5,6 +5,9 @@ const MessageSchema = mongoose.Schema(
     message: {
       text: { type: String, required: true },
     },
+    isImage:{
+      type : Boolean , default : false
+    },
     users: Array,
     sender: {
       type: mongoose.Schema.Types.ObjectId,

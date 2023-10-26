@@ -4,16 +4,21 @@ const jwt = require('jsonwebtoken');
 // const res = require('express/lib/response');
 
 const postSchema = new mongoose.Schema({
-    content: {
-        type: String,
-        require: true
-    },
-    image: {
+    caption: {
         type: String,
         default: ""
     },
-    photo: {
-        type: String
+    imageUrl: {
+        type: String,
+        default: ""
+    },
+    public:{
+        type: Boolean,
+        default: false
+    },
+    category:{
+        type: String,
+        default: "Others"
     },
     authorUsername: {
         type: String,
