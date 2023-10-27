@@ -29,11 +29,11 @@ const auth = async (req, res, next) => {
         message: "Verification Failed",
       });
     }
-    console.log(verifyUser);
+    // console.log(verifyUser);
 
     const user = await User.findOne({username: verifyUser.username}); //getting all the information of user from the database
     // console.log(user);
-    console.log(user.name + " & " + user.email);
+    // console.log(user.name + " & " + user.email);
     req.user = user;
     req.token = token;
     next();

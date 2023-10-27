@@ -18,6 +18,9 @@ const userSchema = new mongoose.Schema({
     unique: true,
     max: 50,
   },
+  interests: {
+    type: Array
+  },
   password: {
     type: String,
     required: true,

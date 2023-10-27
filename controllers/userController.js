@@ -1,6 +1,7 @@
 const User = require("../models/userModel");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const postModel = require("../models/postModel");
 
 module.exports.login = async (req, res, next) => {
   try {
@@ -48,6 +49,7 @@ module.exports.register = async (req, res, next) => {
       username,
       token,
       password: hashedPassword,
+      interests: [],
     });
     delete user.password;
     return res.json({ status: true, user });
@@ -226,15 +228,68 @@ module.exports.addFriend = async (req, res, next) => {
 
 module.exports.changeProfilePhoto = async (req, res, next) => {
   try {
-    console.log("CHANGING")
+    // console.log("CHANGING")
     req.user.avatarImage = req.body.imageUrl;
-    req.user.save();
-    console.log("SUCCESS");
+    await req.user.save();
+
+    postModel.updateMany(
+      { authorUsername: req.user.username },
+      { $set: { authorAvatar: req.body.imageUrl } },
+      (err, result) => {
+        if (err) {
+          console.error(err);
+        } else {
+          console.log(`Updated ${result.modifiedCount} documents.`);
+        }
+      }
+    );
+
     return res.status(200).json({
       success: true,
     });
   } catch (ex) {
     res.status(400).json({ success: false });
+    next(ex);
+  }
+};
+module.exports.fetchInterests = async (req, res, next) => {
+  try {
+    const interests = await req.user.interests;
+    return res.status(200).json({
+      success: true,
+      interests,
+    });
+  } catch (ex) {
+    res.status(500).json({ success: false });
+    next(ex);
+  }
+};
+module.exports.updateInterests = async (req, res, next) => {
+  try {
+    const interests = req.body.interests;
+    req.user.interests = interests;
+    req.user.save();
+    return res.status(200).json({
+      success: true,
+    });
+  } catch (ex) {
+    res.status(500).json({ success: false });
+    next(ex);
+  }
+};
+
+module.exports.fetchProfileDetails = async (req, res, next) => {
+  try {
+    const result =await postModel.countDocuments({username: req.user.username});
+    return res.status(200).json({
+      success: true,
+      username: req.user.username,
+      name: req.user.name,
+      categories: req.user.interests,
+      result
+    });
+  } catch (ex) {
+    res.status(500).json({ success: false });
     next(ex);
   }
 };
