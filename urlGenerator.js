@@ -2,7 +2,7 @@ const { Storage } = require("@google-cloud/storage");
 
 const generateUrl = async (imageName) => {
   const storage = new Storage({
-    keyFilename: "./admin.json",
+    keyFilename: "/etc/secrets/admin.json",
   });
 
   const bucket = storage.bucket("images-node-js.appspot.com"); // Replace with your storage bucket name
