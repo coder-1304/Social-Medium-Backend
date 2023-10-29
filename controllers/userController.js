@@ -280,13 +280,40 @@ module.exports.updateInterests = async (req, res, next) => {
 
 module.exports.fetchProfileDetails = async (req, res, next) => {
   try {
-    const result =await postModel.countDocuments({username: req.user.username});
+    const username = req.params.username;
+    // console.log(req.user.friends.includes(username));
+    if (req.user.username !== username) {
+      if (!req.user.friends.includes(username)) {
+        console.log("U-A");
+        return res.status(401).json({
+          success: false,
+          message: "You are not authorized to perform this action",
+        });
+      }
+    }
+    const result = await postModel.find({ authorUsername:username });
+    const user = await User.findOne({ username });
     return res.status(200).json({
       success: true,
-      username: req.user.username,
-      name: req.user.name,
-      categories: req.user.interests,
-      result
+      username: user.username,
+      name: user.name,
+      avatarImage: user.avatarImage,
+      categories: user.interests,
+      posts: result,
+    });
+  } catch (ex) {
+    res.status(500).json({ success: false });
+    next(ex);
+  }
+};
+
+module.exports.fetchUserDetails = async (req, res, next) => {
+  try {
+    const username = req.params.username;
+    const user = await User.findOne({ username });
+    return res.status(200).json({
+      success: true,
+      imageUrl: user.avatarImage,
     });
   } catch (ex) {
     res.status(500).json({ success: false });

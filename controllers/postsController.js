@@ -103,58 +103,94 @@ module.exports.fetchPosts = async (req, res) => {
     const { filters, interests, categories } = req.body;
     console.log(req.body);
 
-    let allFilters = {};
-    let filtersQueries = [];
+    function createQuery() {
+      let query;
 
-    async function filtersQuery() {
       if (filters === "all") {
-        let query = {
-          public: true,
-        };
-        return query;
-        // filtersQueries.push(query);
-      } else {
-        let query = {
-          authorUsername: { $in: req.user.friends },
-        };
-        // filtersQueries.push(query);
-        return query;
-      }
-    }
-    async function interestsQuery() {
-      if (categories.length === 0) {
-        if (interests == "interest") {
-          let query = {
-            category: { $in: req.user.interests },
-          };
-          // filtersQueries.push(query);
-          return query;
+        if (categories.length === 0) {
+          if (interests === "all") {
+            // Show all accessible posts
+            query = {
+              $or: [
+                { public: true },
+                {
+                  authorUsername: { $in: req.user.friends },
+                },
+              ],
+            };
+          } else {
+            // Show all posts in user's interests
+            query = {
+              $and: [
+                { category: { $in: req.user.interests } },
+                {
+                  $or: [
+                    { public: true },
+                    {
+                      authorUsername: { $in: req.user.friends },
+                    },
+                  ],
+                },
+              ],
+            };
+          }
         } else {
+          // Show all but user specified some categories
+          query = {
+            $and: [
+              {
+                $or: [
+                  { public: true },
+                  {
+                    authorUsername: { $in: req.user.friends },
+                  },
+                ],
+              },
+              { category: { $in: categories } },
+            ],
+          };
         }
       } else {
-        let query = {
-          category: { $in: categories },
-        };
-        // filtersQueries.push(query);
-        return query;
-      }
-    }
-    const q1 = await filtersQuery();
-    const q2 = await interestsQuery();
-    if (q1) {
-      filtersQueries.push(q1);
-    }
-    if (q2) {
-      filtersQueries.push(q2);
-    }
+        if (categories.length === 0) {
+          // Show only friends posts
+          if (interests === "all") {
+            // Show all posts of friends:
+            query = {
+              authorUsername: { $in: req.user.friends },
+            };
+          } else {
+            // Show all posts of friends which is in user's interest categories:
+            query = {
+              $and: [
+                { authorUsername: { $in: req.user.friends } },
+                { category: { $in: req.user.interests } },
+              ],
+            };
+          }
+        } else {
+          // Show only friends posts with the given categories
+          query = {
+            $and: [
+              {
+                authorUsername: { $in: req.user.friends },
+              },
 
-    console.log("FILTER QUERY: " + filtersQueries.length);
-    console.log(filtersQueries);
+              { category: { $in: categories } },
+            ],
+          };
+        }
+      }
+      return query;
+    }
+    // END===============================================================
+
+    let filteredQuery = createQuery();
+
+    console.log("FILTER QUERY: ");
+    console.log(filteredQuery);
 
     // return res.end();
-    const posts = await postModel.find({
-      $and: filtersQueries,
-    });
+    const posts = await postModel.find(filteredQuery);
 
     return res.status(200).json({
       success: true,
@@ -258,3 +294,82 @@ module.exports.dislikePost = async (req, res) => {
     });
   }
 };
+
+module.exports.addComment = async (req, res) => {
+  try {
+    let { postId, timestamp } = req.body;
+
+    const post = await postModel.findOne({ _id: postId });
+    const comment = {
+      username: req.user.username,
+      name: req.user.name,
+      comment: req.body.comment,
+      photo: req.user.avatar,
+      timestamp: timestamp,
+    };
+    post.comments.push(comment);
+    await post.save();
+
+    if (req.user.username === post.authorUsername) {
+      return res.status(200).json({
+        success: true,
+      });
+    }
+
+    const notification = `${req.user.name} commented "${req.body.comment}" on your post`;
+    const newNotification = {
+      notification: notification,
+      notificationAbout: "comments",
+      postId: postId,
+    };
+    const user = await User.findOne({ username: post.authorUsername });
+
+    // let n = user.newNotifications;
+    // n++;
+    user.notifications.push(newNotification);
+    user.newNotifications = user.newNotifications + 1;
+    await user.save();
+
+    return res.status(200).json({
+      success: true,
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+    });
+  }
+};
+
+module.exports.getComments = async (req, res, next) => {
+  try {
+    console.log("Getting Comments...");
+    let postId = req.params.postId;
+    postId = postId.replace(/\s/g, "");
+    const post = await postSchema.findOne({ _id: postId });
+    console.log("Got Comments  " + post.comments);
+    res.send(post.comments);
+    res.end();
+  } catch (error) {
+    console.log(error);
+    res.send(error);
+  }
+};
+// module.exports.fetchUserPosts = async (req, res, next) => {
+//   try {
+//     const username = 
+//     console.log("Getting Comments...");
+//     let postId = req.params.postId;
+//     postId = postId.replace(/\s/g, "");
+//     const post = await postSchema.findOne({ _id: postId });
+//     console.log("Got Comments  " + post.comments);
+//     res.send(post.comments);
+//     res.end();
+//   } catch (error) {
+//     console.log(error);
+//     res.send(error);
+//   }
+// };
+
+

@@ -30,6 +30,10 @@ app.use("/api/messages", messageRoutes);
 app.use("/api/files", fileRoutes);
 app.use("/api/posts", postRoutes);
 
+app.get("/",(req,res)=>{
+  res.send("Hello from Server")
+})
+
 const server = app.listen(process.env.PORT, () =>
   console.log(`Server started on ${process.env.PORT}`)
 );

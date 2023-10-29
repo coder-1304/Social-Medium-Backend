@@ -4,6 +4,7 @@ const MessageSchema = mongoose.Schema(
   {
     message: {
       text: { type: String, required: true },
+      timestamp: { type: String, required: true }, 
     },
     isImage:{
       type : Boolean , default : false
@@ -18,6 +19,7 @@ const MessageSchema = mongoose.Schema(
   {
     timestamps: true,
   }
+  
 );
 
 module.exports = mongoose.model("Messages", MessageSchema);
