@@ -21,6 +21,9 @@ const router = require("express").Router();
 
 // Routings:
 
+router.post("/", (req,res)=>{
+  res.send("HELLO FROM SERVER");
+});
 router.post("/login", login);
 router.post("/register", register);
 router.get("/allFriends",auth, getAllFriends);
@@ -33,7 +36,7 @@ router.get("/addFriend/:username",auth, addFriend);
 router.post("/changeProfilePhoto",auth, changeProfilePhoto);
 router.get("/fetchInterests",auth, fetchInterests);
 router.post("/updateInterests",auth, updateInterests);
-router.get("/fetchProfileDetails/:username",auth, fetchProfileDetails);
+router.get("/fetchProfileDetails",auth, fetchProfileDetails);
 router.get("/fetchUserDetails/:username",auth, fetchUserDetails);
 
 

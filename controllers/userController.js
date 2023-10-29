@@ -280,8 +280,9 @@ module.exports.updateInterests = async (req, res, next) => {
 
 module.exports.fetchProfileDetails = async (req, res, next) => {
   try {
-    const username = req.params.username;
+    const username = req.query.username;
     // console.log(req.user.friends.includes(username));
+    console.log(username)
     if (req.user.username !== username) {
       if (!req.user.friends.includes(username)) {
         console.log("U-A");

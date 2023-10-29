@@ -7,6 +7,7 @@
   resolved "https://registry.npmjs.org/@firebase/analytics-compat/-/analytics-compat-0.2.6.tgz"
   integrity sha512-4MqpVLFkGK7NJf/5wPEEP7ePBJatwYpyjgJ+wQHQGHfzaCDgntOnl9rL2vbVGGKCnRqWtZDIWhctB86UWXaX2Q==
   dependencies:
+  
     "@firebase/analytics" "0.10.0"
     "@firebase/analytics-types" "0.8.0"
     "@firebase/component" "0.6.4"
