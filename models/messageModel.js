@@ -9,6 +9,10 @@ const MessageSchema = mongoose.Schema(
     isImage:{
       type : Boolean , default : false
     },
+    type:{
+      type: String,
+      default: "text"
+    },
     users: Array,
     sender: {
       type: mongoose.Schema.Types.ObjectId,
@@ -19,7 +23,6 @@ const MessageSchema = mongoose.Schema(
   {
     timestamps: true,
   }
-  
 );
 
 module.exports = mongoose.model("Messages", MessageSchema);

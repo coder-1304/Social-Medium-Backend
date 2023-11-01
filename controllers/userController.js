@@ -282,17 +282,31 @@ module.exports.fetchProfileDetails = async (req, res, next) => {
   try {
     const username = req.query.username;
     // console.log(req.user.friends.includes(username));
-    console.log(username)
+    console.log(username);
     if (req.user.username !== username) {
       if (!req.user.friends.includes(username)) {
-        console.log("U-A");
-        return res.status(401).json({
-          success: false,
-          message: "You are not authorized to perform this action",
+        const result = await postModel.find({authorUsername: username,public:true});
+        const count = await postModel.countDocuments({ authorUsername: username,public:true });
+        const user = await User.findOne({ username });
+        // console.log(count);
+        let reqSent = false;
+        if(user.friendReq.includes(req.user.username)){
+          reqSent=true;
+        }
+        return res.status(200).json({
+          success: true,
+          username: user.username,
+          name: user.name,
+          avatarImage: user.avatarImage,
+          categories: user.interests,
+          posts: result,
+          postsCount: count,
+          isFriend: false,
+          reqSent: reqSent
         });
       }
     }
-    const result = await postModel.find({ authorUsername:username });
+    const result = await postModel.find({ authorUsername: username });
     const user = await User.findOne({ username });
     return res.status(200).json({
       success: true,
@@ -301,6 +315,8 @@ module.exports.fetchProfileDetails = async (req, res, next) => {
       avatarImage: user.avatarImage,
       categories: user.interests,
       posts: result,
+      postsCount: result.length,
+      isFriend: true
     });
   } catch (ex) {
     res.status(500).json({ success: false });
