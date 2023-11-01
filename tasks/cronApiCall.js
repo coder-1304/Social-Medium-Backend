@@ -18,8 +18,8 @@ const task = async () => {
 };
 
 // Seting up the cron job to run the task every 10 minutes
-// cron.schedule('*/10 * * * *', task);
+cron.schedule('*/10 * * * *', task);
 
 // 10 seconds
-cron.schedule('*/3 * * * * *', task);
+// cron.schedule('*/3 * * * * *', task);
 
