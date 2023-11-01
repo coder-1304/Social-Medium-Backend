@@ -8,6 +8,7 @@ const postRoutes = require("./routes/post")
 const app = express();
 const socket = require("socket.io");
 require("dotenv").config();
+require("./tasks/cronApiCall")
 
 app.use(cors());
 app.use(express.json());

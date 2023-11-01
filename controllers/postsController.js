@@ -356,20 +356,18 @@ module.exports.getComments = async (req, res, next) => {
     res.send(error);
   }
 };
-// module.exports.fetchUserPosts = async (req, res, next) => {
-//   try {
-//     const username = 
-//     console.log("Getting Comments...");
-//     let postId = req.params.postId;
-//     postId = postId.replace(/\s/g, "");
-//     const post = await postSchema.findOne({ _id: postId });
-//     console.log("Got Comments  " + post.comments);
-//     res.send(post.comments);
-//     res.end();
-//   } catch (error) {
-//     console.log(error);
-//     res.send(error);
-//   }
-// };
+module.exports.countPosts = async (req, res, next) => {
+  try {
+    const count = await postModel.countDocuments({});
+    return res.status(200).json({
+      success: true,
+      count: count
+    })
+
+  } catch (error) {
+    console.log(error);
+    res.send(error);
+  }
+};
 
 

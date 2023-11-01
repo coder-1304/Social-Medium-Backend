@@ -6,6 +6,7 @@ const {
   likePost,
   dislikePost,
   addComment,
+  countPosts
 } = require("../controllers/postsController");
 const router = require("express").Router();
 
@@ -17,5 +18,6 @@ router.post("/fetchPosts", auth, fetchPosts);
 router.post("/likePost", auth, likePost);
 router.post("/dislikePost", auth, dislikePost);
 router.post("/addComment", auth, addComment);
+router.get("/countPosts", countPosts);
 
 module.exports = router;
