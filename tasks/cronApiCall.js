@@ -10,6 +10,7 @@ const apiEndpoint = `${serverhost}/api/posts/countPosts`;
 
 const task = async () => {
   try {
+    console.log("CRON CALLING");
     const response = await axios.get(apiEndpoint);
     console.log('Cron API call success, posts count: ',response.data.count);
   } catch (error) {
@@ -18,7 +19,7 @@ const task = async () => {
 };
 
 // Seting up the cron job to run the task every 10 minutes
-cron.schedule('*/10 * * * *', task);
+cron.schedule('*/1 * * * *', task);
 
 // 10 seconds
 // cron.schedule('*/3 * * * * *', task);
