@@ -21,24 +21,21 @@ const auth = async (req, res, next) => {
     let verifyUser;
     try {
       verifyUser = jwt.verify(token, process.env.JWTSECRETKEY);
-      // print(verifyUser);
     } catch (error) {
+
       return res.status(401).json({
         success: false,
         erroCode: 10,
         message: "Verification Failed",
       });
     }
-    // console.log(verifyUser);
 
-    const user = await User.findOne({username: verifyUser.username}); //getting all the information of user from the database
-    // console.log(user);
-    // console.log(user.name + " & " + user.email);
+    const user = await User.findOne({ username: verifyUser.username }); //getting all the information of user from the database
+
     req.user = user;
     req.token = token;
     next();
   } catch (error) {
-    console.log(error);
     return res.status(400).json({
       success: false,
       statusCode: 10,

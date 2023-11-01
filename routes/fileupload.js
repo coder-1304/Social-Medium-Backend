@@ -53,8 +53,6 @@ async function uploadImage(file, quantity) {
 }
 
 router.post("/uploadImage", upload, async (req, res) => {
-  console.log(req.file);
-  console.log("File uploading....");
   try {
     const file = {
       type: req.file.mimetype,

@@ -4,7 +4,6 @@ const User = require("../models/userModel");
 
 module.exports.createPost = async (req, res) => {
   try {
-    console.log(req.body);
     let { caption, imageUrl, category, public } = req.body;
     // if (!caption || !imageUrl) {
     //   return res.status(400).json({
@@ -29,7 +28,6 @@ module.exports.createPost = async (req, res) => {
     } else {
       public = false;
     }
-    // console.log("1")
 
     const postData = new postModel({
       caption: caption,
@@ -43,10 +41,8 @@ module.exports.createPost = async (req, res) => {
       dislikes: [],
       comments: [],
     });
-    // console.log("2")
 
     await postData.save();
-    // console.log("3")
 
     return res.status(200).json({
       success: true,
@@ -101,7 +97,6 @@ module.exports.fetchCategories = async (req, res) => {
 module.exports.fetchPosts = async (req, res) => {
   try {
     const { filters, interests, categories } = req.body;
-    console.log(req.body);
 
     function createQuery() {
       let query;
@@ -186,8 +181,6 @@ module.exports.fetchPosts = async (req, res) => {
 
     let filteredQuery = createQuery();
 
-    console.log("FILTER QUERY: ");
-    console.log(filteredQuery);
 
     // return res.end();
     const posts = await postModel.find(filteredQuery);
@@ -206,18 +199,13 @@ module.exports.fetchPosts = async (req, res) => {
 };
 module.exports.likePost = async (req, res) => {
   try {
-    // console.log("Liking Post");
     let _id = req.body._id;
-    // postId = postId.replace(/\s/g, "");
-    // console.log("Post Id is" + postId);
 
     const post = await postModel.findOne({ _id: _id });
     if (!post.likes.includes(req.user.username)) {
       post.likes.push(req.user.username);
       await post.save();
-      // res.json({})
     } else {
-      console.log(`${req.user.username} already exists in the likes array.`);
       return res.status(200).json({
         success: true,
       });
@@ -228,11 +216,8 @@ module.exports.likePost = async (req, res) => {
         { _id: _id },
         { $pull: { dislikes: req.user.username } }
       );
-      console.log(result);
     }
 
-    // console.log(req.user.username + "---" + post.authorUsername);
-    // console.log(req.user.username == post.authorUsername);
     if (req.user.username == post.authorUsername) {
       return res.status(200).json({
         success: true,
@@ -245,10 +230,6 @@ module.exports.likePost = async (req, res) => {
       notificationAbout: post.content,
       postId: _id,
     };
-    // const user = await User.findOne({ username: post.authorUsername });
-    // console.log(typeof user.newNotifications);
-    // let n = user.newNotifications;
-    // n++;
     req.user.newNotification = req.user.newNotification + 1;
     req.user.notifications.push(newNotification);
     // req.user.newNotifications = n;
@@ -344,11 +325,9 @@ module.exports.addComment = async (req, res) => {
 
 module.exports.getComments = async (req, res, next) => {
   try {
-    console.log("Getting Comments...");
     let postId = req.params.postId;
     postId = postId.replace(/\s/g, "");
     const post = await postSchema.findOne({ _id: postId });
-    console.log("Got Comments  " + post.comments);
     res.send(post.comments);
     res.end();
   } catch (error) {

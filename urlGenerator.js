@@ -1,5 +1,4 @@
 const { Storage } = require("@google-cloud/storage");
-
 const generateUrl = async (imageName) => {
   const storage = new Storage({
     keyFilename: "/etc/secrets/admin.json",

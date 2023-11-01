@@ -16,11 +16,9 @@ module.exports.login = async (req, res, next) => {
 
     req.user = user;
 
-    console.log("SIGNING JWT");
     const token = await jwt.sign({ username }, process.env.JWTSECRETKEY, {
       expiresIn: "300h",
     });
-    console.log("SIGNED JWT");
     req.user.token = token;
     req.user.save();
     return res.json({ status: true, user });
@@ -65,7 +63,6 @@ module.exports.getAllFriends = async (req, res, next) => {
         $in: req.user.friends,
       },
     }).select(["email", "username", "name", "avatarImage", "_id"]);
-    // console.log(users);
     return res.json(users);
   } catch (ex) {
     next(ex);
@@ -105,7 +102,6 @@ module.exports.logOut = (req, res, next) => {
 
 module.exports.searchUsers = async (req, res, next) => {
   try {
-    // console.log("Searching");
     const text = req.params.text;
     const results = await User.find({
       $or: [
@@ -176,7 +172,6 @@ module.exports.fetchRequests = async (req, res, next) => {
 };
 
 module.exports.addFriend = async (req, res, next) => {
-  console.log("ADDING");
   try {
     let fUsername = req.params.username;
     let myUsername = req.user.username;
@@ -228,7 +223,6 @@ module.exports.addFriend = async (req, res, next) => {
 
 module.exports.changeProfilePhoto = async (req, res, next) => {
   try {
-    // console.log("CHANGING")
     req.user.avatarImage = req.body.imageUrl;
     await req.user.save();
 
@@ -238,8 +232,6 @@ module.exports.changeProfilePhoto = async (req, res, next) => {
       (err, result) => {
         if (err) {
           console.error(err);
-        } else {
-          console.log(`Updated ${result.modifiedCount} documents.`);
         }
       }
     );
@@ -281,17 +273,20 @@ module.exports.updateInterests = async (req, res, next) => {
 module.exports.fetchProfileDetails = async (req, res, next) => {
   try {
     const username = req.query.username;
-    // console.log(req.user.friends.includes(username));
-    console.log(username);
     if (req.user.username !== username) {
       if (!req.user.friends.includes(username)) {
-        const result = await postModel.find({authorUsername: username,public:true});
-        const count = await postModel.countDocuments({ authorUsername: username,public:true });
+        const result = await postModel.find({
+          authorUsername: username,
+          public: true,
+        });
+        const count = await postModel.countDocuments({
+          authorUsername: username,
+          public: true,
+        });
         const user = await User.findOne({ username });
-        // console.log(count);
         let reqSent = false;
-        if(user.friendReq.includes(req.user.username)){
-          reqSent=true;
+        if (user.friendReq.includes(req.user.username)) {
+          reqSent = true;
         }
         return res.status(200).json({
           success: true,
@@ -302,7 +297,7 @@ module.exports.fetchProfileDetails = async (req, res, next) => {
           posts: result,
           postsCount: count,
           isFriend: false,
-          reqSent: reqSent
+          reqSent: reqSent,
         });
       }
     }
@@ -316,7 +311,7 @@ module.exports.fetchProfileDetails = async (req, res, next) => {
       categories: user.interests,
       posts: result,
       postsCount: result.length,
-      isFriend: true
+      isFriend: true,
     });
   } catch (ex) {
     res.status(500).json({ success: false });
