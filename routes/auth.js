@@ -12,7 +12,8 @@ const {
   fetchInterests,
   updateInterests,
   fetchProfileDetails,
-  fetchUserDetails
+  fetchUserDetails,
+  fetchAlerts
 } = require("../controllers/userController");
 
 const auth = require("../middlewares/auth");
@@ -29,7 +30,7 @@ router.post("/register", register);
 router.get("/allFriends",auth, getAllFriends);
 router.post("/setavatar/:id", setAvatar);
 router.get("/logout/:id", logOut);
-router.get("/searchUsers/:text", searchUsers);
+router.get("/searchUsers/:text",auth, searchUsers);
 router.get("/sendFriendRequest/:username",auth, sendFriendRequest);
 router.get("/fetchRequests",auth, fetchRequests);
 router.get("/addFriend/:username",auth, addFriend);
@@ -38,6 +39,7 @@ router.get("/fetchInterests",auth, fetchInterests);
 router.post("/updateInterests",auth, updateInterests);
 router.get("/fetchProfileDetails",auth, fetchProfileDetails);
 router.get("/fetchUserDetails/:username",auth, fetchUserDetails);
+router.get("/fetchAlerts",auth, fetchAlerts);
 
 
 

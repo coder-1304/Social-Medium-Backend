@@ -1,47 +1,52 @@
-const mongoose = require('mongoose');
-const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken');
+const mongoose = require("mongoose");
+const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
 // const res = require('express/lib/response');
 
-const postSchema = new mongoose.Schema({
+const postSchema = new mongoose.Schema(
+  {
     caption: {
-        type: String,
-        default: ""
+      type: String,
+      default: "",
     },
     imageUrl: {
-        type: String,
-        default: ""
+      type: String,
+      default: "",
     },
-    public:{
-        type: Boolean,
-        default: false
+    public: {
+      type: Boolean,
+      default: false,
     },
-    category:{
-        type: String,
-        default: "Others"
+    category: {
+      type: String,
+      default: "Others",
     },
     authorUsername: {
-        type: String,
-        require: true
+      type: String,
+      require: true,
     },
     authorName: {
-        type: String,
-        require: true
+      type: String,
+      require: true,
     },
     authorAvatar: {
-        type: String,
-        require: true
+      type: String,
+      require: true,
     },
     likes: {
-        type: Array,
+      type: Array,
     },
     dislikes: {
-        type: Array,
+      type: Array,
     },
     comments: {
-        type: Array
+      type: Array,
     },
-})
+  },
+  {
+    timestamps: true,
+  }
+);
 
-const Post = new mongoose.model('Post', postSchema);
+const Post = new mongoose.model("Post", postSchema);
 module.exports = Post;

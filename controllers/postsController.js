@@ -183,7 +183,7 @@ module.exports.fetchPosts = async (req, res) => {
 
 
     // return res.end();
-    const posts = await postModel.find(filteredQuery);
+    const posts = await postModel.find(filteredQuery).sort({ updatedAt: 1 });
 
     return res.status(200).json({
       success: true,
@@ -218,7 +218,7 @@ module.exports.likePost = async (req, res) => {
       );
     }
 
-    if (req.user.username == post.authorUsername) {
+    if (req.user.username === post.authorUsername) {
       return res.status(200).json({
         success: true,
       });
@@ -233,7 +233,8 @@ module.exports.likePost = async (req, res) => {
     req.user.newNotification = req.user.newNotification + 1;
     req.user.notifications.push(newNotification);
     // req.user.newNotifications = n;
-    req.user.save();
+    console.log("SAVING");
+    await req.user.save();
     return res.status(200).json({
       success: true,
     });

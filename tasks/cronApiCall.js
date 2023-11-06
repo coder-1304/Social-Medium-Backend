@@ -10,7 +10,6 @@ const apiEndpoint = `${serverhost}/api/posts/countPosts`;
 
 const task = async () => {
   try {
-    console.log("CRON CALLING");
     const response = await axios.get(apiEndpoint);
     console.log('Cron API call success, posts count: ',response.data.count);
   } catch (error) {

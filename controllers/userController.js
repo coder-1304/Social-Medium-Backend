@@ -103,12 +103,36 @@ module.exports.logOut = (req, res, next) => {
 module.exports.searchUsers = async (req, res, next) => {
   try {
     const text = req.params.text;
-    const results = await User.find({
-      $or: [
-        { name: { $regex: text, $options: "i" } },
-        { username: { $regex: text, $options: "i" } },
-      ],
-    }).select("name username avatarImage");
+
+    const results = await User.aggregate([
+      {
+        $match: {
+          $or: [
+            { name: { $regex: text, $options: "i" } },
+            { username: { $regex: text, $options: "i" } },
+          ],
+        },
+      },
+      {
+        $project: {
+          name: 1,
+          username: 1,
+          avatarImage: 1,
+          friends: 1,
+          isFriend: {
+            $in: [req.user.username, "$friends"],
+          },
+          reqSent: {
+            $ne: [{ from: req.user.username }, "$friendReq"],
+          },
+        },
+      },
+      {
+        $match: {
+          username: { $ne: req.user.username },
+        },
+      },
+    ]);
 
     return res.status(200).json({
       success: true,
@@ -125,7 +149,13 @@ module.exports.sendFriendRequest = async (req, res, next) => {
     if (req.user.username == username || req.user.friends.includes(username)) {
       return res.status(400).json({ success: false });
     }
+
+    // Checking if the other user has already sent current user a request:
+    if (req.user.friendReq.includes(username)) {
+      return res.status(403).json({ success: false, errorcode: 2 });
+    }
     const searchUser = await User.findOne({ username: username });
+
     let requests = searchUser.friendReq;
     if (!requests.includes(req.user.username)) {
       requests.push(req.user.username);
@@ -301,7 +331,9 @@ module.exports.fetchProfileDetails = async (req, res, next) => {
         });
       }
     }
-    const result = await postModel.find({ authorUsername: username });
+    const result = await postModel
+      .find({ authorUsername: username })
+      .sort({ updatedAt: -1 });
     const user = await User.findOne({ username });
     return res.status(200).json({
       success: true,
@@ -328,7 +360,25 @@ module.exports.fetchUserDetails = async (req, res, next) => {
       imageUrl: user.avatarImage,
     });
   } catch (ex) {
-    res.status(500).json({ success: false });
-    next(ex);
+    res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+    });
+  }
+};
+
+module.exports.fetchAlerts = async (req, res, next) => {
+  try {
+    const notifications = [...req.user.notifications].reverse();
+    return res.status(200).json({
+      success: true,
+      notifications: notifications,
+      newNotifications: req.user.newNotifications,
+    });
+  } catch (ex) {
+    res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+    });
   }
 };
