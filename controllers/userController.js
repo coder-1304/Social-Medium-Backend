@@ -103,7 +103,6 @@ module.exports.logOut = (req, res, next) => {
 module.exports.searchUsers = async (req, res, next) => {
   try {
     const text = req.params.text;
-
     const results = await User.aggregate([
       {
         $match: {
@@ -123,8 +122,27 @@ module.exports.searchUsers = async (req, res, next) => {
             $in: [req.user.username, "$friends"],
           },
           reqSent: {
-            $ne: [{ from: req.user.username }, "$friendReq"],
-          },
+            $cond: {
+              if: {
+                $gt: [
+                  {
+                    $size: {
+                      $filter: {
+                        input: "$friendReq",
+                        as: "friendRequest",
+                        cond: {
+                          $eq: ["$$friendRequest.from", req.user.username]
+                        }
+                      }
+                    }
+                  },
+                  0
+                ]
+              },
+              then: true,
+              else: false
+            }
+          }
         },
       },
       {
@@ -133,6 +151,43 @@ module.exports.searchUsers = async (req, res, next) => {
         },
       },
     ]);
+    
+
+    // const results = await User.aggregate([
+    //   {
+    //     $match: {
+    //       $or: [
+    //         { name: { $regex: text, $options: "i" } },
+    //         { username: { $regex: text, $options: "i" } },
+    //       ],
+    //     },
+    //   },
+    //   {
+    //     $project: {
+    //       name: 1,
+    //       username: 1,
+    //       avatarImage: 1,
+    //       friends: 1,
+    //       isFriend: {
+    //         $in: [req.user.username, "$friends"],
+    //       },
+    //       // reqSent: {
+    //       //   $ne: [{ from: req.user.username }, "$friendReq"],
+    //       // },
+    //       reqSent: {
+    //         $not: {
+    //           $elemMatch: { from: req.user.username }
+    //         }
+    //       }
+    //     },
+    //   },
+    //   {
+    //     $match: {
+    //       username: { $ne: req.user.username },
+    //     },
+    //   },
+    // ]);
+    console.log(results);
 
     return res.status(200).json({
       success: true,
